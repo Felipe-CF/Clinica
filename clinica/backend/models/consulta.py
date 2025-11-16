@@ -11,7 +11,7 @@ class Consulta(models.Model):
     data_consulta = models.DateTimeField(blank=False, null=False, related_name='data_consulta')
     consulta_profissional = models.OneToOneField(Profissional, on_delete=models.CASCADE, blank=False, null=False, related_name='profisssional')
     consulta_paciente = models.OneToOneField(Paciente, on_delete=models.CASCADE, blank=False, null=False, related_name='paciente')
-    confirmacao = models.BooleanField(default=False, related_name='confirmacao')
+    status_confirmacao = models.BooleanField(default=False, related_name='confirmacao')
 
     def __str__(self):
         return f"Data da Consulta: {self.data_consulta}   Paciente: {self.consulta_paciente.nome} Profissional: {self.consulta_profissional.nome} Confirmada: {self.confirmacao}"

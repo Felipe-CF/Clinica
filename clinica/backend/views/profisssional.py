@@ -3,15 +3,15 @@ from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from backend.strategies.strategy_usuario import AdminStrategy 
+from backend.strategies.strategy_permissions import  ProfissionalPermission
 from backend.serializer.profissional import ProfissionalSerializer, Profissional, Usuario
-from backend.strategies.strategy_usuario import ProfissionalStrategy, AdminStrategy 
-from backend.strategies.strategy_permissions import UsuarioPermission
 
 
 class ProfissionalView(viewsets.ModelViewSet):
     queryset = Profissional.objects.all()
     serializer_class = ProfissionalSerializer
-    permission_strategy = UsuarioPermission()
+    permission_strategy = ProfissionalPermission()
     usuario_strategy = AdminStrategy()
 
     def get_permissions(self): # sobrescreve o método padrão de permissões do DRF
@@ -19,6 +19,8 @@ class ProfissionalView(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
+            self.usuario_strategy.validar_usuario(request)
+
             serializer = ProfissionalSerializer(data=request.data)
 
             if serializer.is_valid():
@@ -32,8 +34,6 @@ class ProfissionalView(viewsets.ModelViewSet):
     
     def retrieve(self, request, *args, **kwargs):
         try:
-            self.usuario_strategy.validar_usuario(request)
-
             # Recupera o objeto com o metodo do ModelViewSet que usa 'lookup_field' usando o valor passado na URL
             item = self.get_object()
             serializer = self.get_serializer(item)
@@ -47,8 +47,6 @@ class ProfissionalView(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         try:
-            self.usuario_strategy.validar_usuario(request)
-
             itens = self.get_queryset()
 
             if not itens.exists():

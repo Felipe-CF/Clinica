@@ -15,7 +15,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'backend'
+    'backend',
+    'rest_framework',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -56,6 +58,14 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '5432',
     }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',  
+        'rest_framework.filters.OrderingFilter',  
+    ],
 }
 
 AUTH_PASSWORD_VALIDATORS = [
