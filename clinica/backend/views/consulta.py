@@ -5,29 +5,29 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from backend.filters.consulta_filters import ConsultaFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from backend.strategies.strategy_usuario import AdminStrategy 
-from backend.strategies.strategy_permissions import  ProfissionalPermission
-from backend.serializer.profissional import ProfissionalSerializer, Profissional, Usuario
+from backend.strategies.strategy_usuario import ConsultaStrategy 
+from backend.strategies.strategy_permissions import ConsultaPermission
+from backend.serializer.consulta import ConsultaSerializer, Consulta 
 
 
-class ProfissionalView(viewsets.ModelViewSet):
-    queryset = Profissional.objects.all()
-    serializer_class = ProfissionalSerializer
+class ConsultaView(viewsets.ModelViewSet):
+    queryset = Consulta.objects.all()
+    serializer_class = ConsultaSerializer
     filterset_class = ConsultaFilter
     filter_backends = [DjangoFilterBackend]
     search_fields = ['conteudo', 'data_criacao', 'status', 'tag']
     ordering_fields = ['data_criacao']
-    permission_strategy = ProfissionalPermission()
-    usuario_strategy = AdminStrategy()
+    permission_strategy = ConsultaPermission()
+    usuario_strategy = ConsultaStrategy()
 
     def get_permissions(self): # sobrescreve o método padrão de permissões do DRF
         return self.permission_strategy.get_permissions(self.action)
 
     def create(self, request, *args, **kwargs):
         try:
-            self.usuario_strategy.validar_usuario(request)
+            self.usuario_strategy.validar_agendamento(request)
 
-            serializer = ProfissionalSerializer(data=request.data)
+            serializer = ConsultaSerializer(data=request.data)
 
             if serializer.is_valid():
                 serializer.save()
@@ -40,6 +40,8 @@ class ProfissionalView(viewsets.ModelViewSet):
     
     def retrieve(self, request, *args, **kwargs):
         try:
+            self.usuario_strategy.validar_agendamento(request)
+
             # Recupera o objeto com o metodo do ModelViewSet que usa 'lookup_field' usando o valor passado na URL
             item = self.get_object()
             serializer = self.get_serializer(item)
@@ -53,10 +55,12 @@ class ProfissionalView(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         try:
+            self.usuario_strategy.validar_agendamento(request)
+
             itens = self.get_queryset()
 
             if not itens.exists():
-                return Response({'mensagem': 'Nenhum profissional encontrado'}, status=status.HTTP_200_OK)
+                return Response({'mensagem': 'Nenhum Consulta encontrado'}, status=status.HTTP_200_OK)
             
             serializer = self.get_serializer(itens, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -66,10 +70,10 @@ class ProfissionalView(viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         try:
-            self.usuario_strategy.validar_usuario(request)
+            self.usuario_strategy.validar_agendamento(request)
 
             if 'username' in request.data:
-                item = get_object_or_404(Profissional, user__username=request.data.get("username"))
+                item = get_object_or_404(Consulta, user__username=request.data.get("username"))
 
                 # Atualiza parcialmente o objeto
                 serializer = self.get_serializer(item, data=request.data, partial=True)
@@ -85,18 +89,20 @@ class ProfissionalView(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         try:
-            self.usuario_strategy.validar_usuario(request)
+            self.usuario_strategy.validar_agendamento(request)
 
-            if 'username' in request.data:
-                item = get_object_or_404(Usuario, user__username=request.data.get("username"))
+            # if 'username' in request.data:
+            #     item = get_object_or_404(Usuario, user__username=request.data.get("username"))
 
-                if item.perfil == 'pro':
-                    item.delete()
-                    return Response({'mensagem': 'Profissional deletado com sucesso'}, status=status.HTTP_204_NO_CONTENT)
-                else:
-                    return Response({'erro': 'Usuário não tem permissão para ser excluído'}, status=status.HTTP_403_FORBIDDEN)
+            #     if item.perfil == 'pro':
+            #         item.delete()
 
-            return Response({"erro": "Campos obrigatórios ausentes na requisição"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'mensagem': 'Consulta deletado com sucesso'}, status=status.HTTP_204_NO_CONTENT)
+            
+            #     else:
+            #         return Response({'erro': 'Usuário não tem permissão para ser excluído'}, status=status.HTTP_403_FORBIDDEN)
+
+            # return Response({"erro": "Campos obrigatórios ausentes na requisição"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         except Exception as e:
             return Response({'erro': 'Problema na API'}, status=status.HTTP_404_NOT_FOUND)
