@@ -5,12 +5,12 @@ from backend.models.consulta import Consulta
 class ConsultaFilter(django_filters.FilterSet):
     nome_paciente = django_filters.CharFilter(
         field_name='consulta_paciente.nome', 
-        lookup_expr='regex'
+        lookup_expr='exact'
         )
 
     nome_profissional = django_filters.CharFilter(
         field_name='consulta_profissional.nome', 
-        lookup_expr='regex'
+        lookup_expr='exact'
         )
 
     data_criacao = django_filters.DateFilter(

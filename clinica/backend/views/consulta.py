@@ -57,12 +57,13 @@ class ConsultaView(viewsets.ModelViewSet):
         try:
             self.usuario_strategy.validar_agendamento(request)
 
-            itens = self.get_queryset()
+            itens = self.filter_queryset(self.get_queryset())
 
             if not itens.exists():
-                return Response({'mensagem': 'Nenhum Consulta encontrado'}, status=status.HTTP_200_OK)
+                return Response({'mensagem': 'Nenhuma Consulta encontrada'}, status=status.HTTP_200_OK)
             
             serializer = self.get_serializer(itens, many=True)
+            
             return Response(serializer.data, status=status.HTTP_200_OK)
         
         except Exception as e:
@@ -72,11 +73,12 @@ class ConsultaView(viewsets.ModelViewSet):
         try:
             self.usuario_strategy.validar_agendamento(request)
 
-            if 'username' in request.data:
-                item = get_object_or_404(Consulta, user__username=request.data.get("username"))
+            if 'consulta_id' in request.data:
+                item = get_object_or_404(Consulta, id=request.data.get("consulta_id"))
 
                 # Atualiza parcialmente o objeto
                 serializer = self.get_serializer(item, data=request.data, partial=True)
+
                 if serializer.is_valid():
                     serializer.save()
                     return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
@@ -91,18 +93,14 @@ class ConsultaView(viewsets.ModelViewSet):
         try:
             self.usuario_strategy.validar_agendamento(request)
 
-            # if 'username' in request.data:
-            #     item = get_object_or_404(Usuario, user__username=request.data.get("username"))
+            if 'consulta_id' in request.data:
+                item = get_object_or_404(Consulta, id=request.data.get("consulta_id"))
 
-            #     if item.perfil == 'pro':
-            #         item.delete()
+                item.delete()
 
-            return Response({'mensagem': 'Consulta deletado com sucesso'}, status=status.HTTP_204_NO_CONTENT)
+                return Response({'mensagem': 'Consulta deletado com sucesso'}, status=status.HTTP_204_NO_CONTENT)
             
-            #     else:
-            #         return Response({'erro': 'Usuário não tem permissão para ser excluído'}, status=status.HTTP_403_FORBIDDEN)
-
-            # return Response({"erro": "Campos obrigatórios ausentes na requisição"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({"erro": "Campos obrigatórios ausentes na requisição"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         except Exception as e:
             return Response({'erro': 'Problema na API'}, status=status.HTTP_404_NOT_FOUND)

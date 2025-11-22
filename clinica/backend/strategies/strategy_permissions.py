@@ -30,6 +30,7 @@ class PacientePermission(PermissaoStrategy):
         
 class ConsultaPermission(PermissaoStrategy):
     def get_permissions(self, action):
+
         if action in ['create', 'partial_update', 'retrieve', 'list', 'destroy']:
             return [IsAuthenticated()]
         return [AllowAny()]
@@ -39,6 +40,16 @@ class ConsultaPermission(PermissaoStrategy):
             raise ValueError("Acao permitida somente para pacientes")
 
 class AdminPermission(PermissaoStrategy):
+    def get_permissions(self, action):
+        if action in ['create', 'partial_update', 'destroy']:
+            return [IsAuthenticated()]
+        return [AllowAny()]
+    
+    def validar(self, user):
+        if user.perfil != 'admin':
+            raise ValueError("Acao permitida somente para adiministradores")
+        
+class EspecialidadePermission(PermissaoStrategy):
     def get_permissions(self, action):
         if action in ['create', 'partial_update', 'destroy']:
             return [IsAuthenticated()]
