@@ -11,7 +11,7 @@ class Usuario(AbstractUser):
         ('atend', 'Atendente'),
     )
     perfil = models.CharField(max_length=20, choices=PERFIL)
-    email = models.EmailField(blank=False, null=False, related_name='email')
+    email = models.EmailField(blank=False, null=False)
 
     def __str__(self):
-        return self.username + ' ' + self.perfil + ' ' + self.status
+        return self.username + ' ' + self.perfil

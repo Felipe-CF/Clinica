@@ -8,6 +8,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = 'backend.Usuario'
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -16,8 +18,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'backend',
+    'rest_framework.authtoken',
     'rest_framework',
     'django_filters',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -66,7 +70,15 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',  
         'rest_framework.filters.OrderingFilter',  
     ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',  
+        # 'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',  # Permissão padrão (aberta para todos)
+    ],
 }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -82,6 +94,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+ROOT_URLCONF = 'clinica.urls'
 
 LANGUAGE_CODE = 'pt-br'
 
